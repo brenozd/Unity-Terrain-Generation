@@ -11,8 +11,8 @@ public class CaveGenerator : MonoBehaviour
     public int textureHeight = 256;
 
     [Range(0.000f, 1.000f)]
-    public float offset = 0.350f;
-    public float noiseScale = 5.67f;
+    public float offset = 0.495f;
+    public float noiseScale = 6f;
     public int Seed = 0;
 
     [Header("CA Map settings")]
@@ -24,7 +24,7 @@ public class CaveGenerator : MonoBehaviour
     public GameObject prefab;
 
     [Header("Generation Settings")]
-    public bool autoUpdate = false;
+    public bool autoUpdate = true;
 
     float[,] values;
     GameObject parent;
@@ -36,35 +36,18 @@ public class CaveGenerator : MonoBehaviour
             parent = new GameObject("Cells");
         else
             parent = GameObject.Find("Cells");
+        generateCave();
     }
 
     public void generateCave()
     {
-        values = new float[caveWidth, caveHeight];
-        values = caMap(generateNoiseValues());
-        printGame();
-    }
-
-    Texture2D generateTexture(int width, int height)
-    {
-        Texture2D texture = new Texture2D(textureWidth, textureHeight);
-        for (int x = 0; x < textureWidth; x++)
+        if (parent != null)
         {
-            for (int y = 0; y < textureHeight; y++)
-            {
-                texture.SetPixel(x, y, calculateColor(x, y));
-            }
+            values = new float[caveWidth, caveHeight];
+            values = caMap(generateNoiseValues());
+            printGame();
         }
-        texture.Apply();
-        return texture;
-    }
 
-    Color calculateColor(float x, float y)
-    {
-        float xCoord = (float)x / textureWidth * noiseScale;
-        float yCoord = (float)y / textureHeight * noiseScale;
-        float sample = (float)Noise.PerlinNoise2D(xCoord, yCoord);
-        return new Color(sample, sample, sample);
     }
 
     int computeNeighbors(int x, int y, float[,] array)
@@ -85,18 +68,21 @@ public class CaveGenerator : MonoBehaviour
 
     float[,] generateNoiseValues()
     {
-        Texture2D noiseTexture = generateTexture(textureWidth, textureHeight);
+        NoiseTexture.Seed = Seed;
+        NoiseTexture.NoiseScale = noiseScale;
+
+        NoiseTexture.clearPermutationTable();
+        Texture2D noiseTexture = NoiseTexture.generateTexture2D(textureWidth, textureHeight);
         float[,] _returnList = new float[caveWidth, caveHeight];
 
         float gridStepSizeX = textureWidth / caveWidth;
         float gridStepSizeY = textureHeight / caveHeight;
-        
+
 
         for (int x = 0; x < caveWidth; x++)
         {
             for (int y = 0; y < caveHeight; y++)
             {
-
                 _returnList[x, y] = noiseTexture.GetPixel((int)(x * gridStepSizeX), (int)(y * gridStepSizeY)).grayscale;
             }
         }

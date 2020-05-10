@@ -28,53 +28,6 @@ public class MarchingCube : MonoBehaviour
         densityValues = array;
     }
 
-    #region Desntiy Calculations
-    public Texture3D generateTexture()
-    {
-        Noise.Seed = 1;
-        Texture3D noiseTexture = new Texture3D(textureWidth, textureHeight, textureDepth, TextureFormat.ARGB32, false);
-        noiseTexture.wrapMode = TextureWrapMode.Clamp;
-
-        for (int _x = 0; _x < textureWidth; _x++)
-        {
-            for (int _y = 0; _y < textureHeight; _y++)
-            {
-                for (int _z = 0; _z < textureDepth; _z++)
-                {
-                    float noiseValue = Noise.PerlinNoise3D((float)_x / TerrainSize, (float)_y / TerrainSize, (float)_z / TerrainSize);
-                    Color noiseColor = new Color(noiseValue, noiseValue, noiseValue);
-                    noiseTexture.SetPixel(_x, _y, _z, noiseColor);
-                }
-            }
-        }
-        noiseTexture.Apply();
-        return noiseTexture;
-    }
-
-    public float[,,] calcualteNoiseValues(bool newNoiseTexture = true)
-    {
-        float[,,] _returnValues = new float[TerrainSize, TerrainSize, TerrainSize];
-        if (newNoiseTexture)
-            noiseTexture = generateTexture();
-
-        float gridStepSizeX = textureWidth / TerrainSize;
-        float gridStepSizeY = textureHeight / TerrainSize;
-        float gridStepSizeZ = textureDepth / TerrainSize;
-
-        for (int _x = 0; _x < TerrainSize; _x++)
-        {
-            for (int _y = 0; _y < TerrainSize; _y++)
-            {
-                for (int _z = 0; _z < TerrainSize; _z++)
-                {
-                    _returnValues[_x, _y, _z] = noiseTexture.GetPixel((int)(_x * gridStepSizeX), (int)(_y * gridStepSizeY), (int)(_z * gridStepSizeZ)).grayscale;
-                }
-            }
-        }
-        return _returnValues;
-    }
-    #endregion
-
     int getCaseValue(int x, int y, int z)
     {
         int _returnValue = 0;
@@ -98,6 +51,29 @@ public class MarchingCube : MonoBehaviour
         float _y = p1.y + t * (p2.y - p1.y);
         float _z = p1.z + t * (p2.z - p1.z);
         return new Vector3(_x, _y, _z);
+    }
+
+    public float[,,] calcualteNoiseValues(bool newNoiseTexture = true)
+    {
+        float[,,] _returnValues = new float[TerrainSize, TerrainSize, TerrainSize];
+        if (newNoiseTexture)
+            noiseTexture = NoiseTexture.generateTexture3D(textureWidth, textureHeight, textureDepth);
+
+        float gridStepSizeX = textureWidth / TerrainSize;
+        float gridStepSizeY = textureHeight / TerrainSize;
+        float gridStepSizeZ = textureDepth / TerrainSize;
+
+        for (int _x = 0; _x < TerrainSize; _x++)
+        {
+            for (int _y = 0; _y < TerrainSize; _y++)
+            {
+                for (int _z = 0; _z < TerrainSize; _z++)
+                {
+                    _returnValues[_x, _y, _z] = noiseTexture.GetPixel((int)(_x * gridStepSizeX), (int)(_y * gridStepSizeY), (int)(_z * gridStepSizeZ)).grayscale;
+                }
+            }
+        }
+        return _returnValues;
     }
 
     public Mesh generateMesh()

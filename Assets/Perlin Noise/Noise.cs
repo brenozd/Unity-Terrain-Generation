@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System;
 
-public static class Noise
+public class Noise
 {
     #region Private variables
     ///<summary>
@@ -61,20 +61,24 @@ public static class Noise
     }
 
     //Populate permutation table
-    static void populatePermutation()
+    static void populatePermutationTable()
     {
         if (Seed == 0)
         {
             rand = new System.Random();
             Seed = rand.Next();
         }
-
         permutation.Clear();
         rand = new System.Random(Seed);
         for (int i = 0; i < 512; i++)
         {
             permutation.Add(rand.Next(256));
         }
+    }
+
+    public static void clearPermutationTable()
+    {
+        permutation.Clear();
     }
     #endregion
     #region Perlin Noise 1D
@@ -90,7 +94,7 @@ public static class Noise
     {
         if (permutation.Count == 0)
         {
-            populatePermutation();
+            populatePermutationTable();
         }
         int _x = (int)x;
 
@@ -156,7 +160,7 @@ public static class Noise
 
         if (permutation.Count == 0)
         {
-            populatePermutation();
+            populatePermutationTable();
         }
 
         //Floor values of variables X and Y
@@ -245,7 +249,7 @@ public static class Noise
 
         if (permutation.Count == 0)
         {
-            populatePermutation();
+            populatePermutationTable();
         }
 
         //Floor values of variables X and Y

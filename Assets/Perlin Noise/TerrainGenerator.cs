@@ -6,19 +6,19 @@ public class TerrainGenerator : MonoBehaviour
 {
     [Header("HeightMap Settings")]
     [Range(4, 2048)]
-    public int textureWidth;
+    public int textureWidth = 512;
     [Range(4, 2048)]
-    public int textureHeight;
+    public int textureHeight = 512;
     [Range(1, 20)]
-    public float noiseScale;
+    public float noiseScale = 5;
 
     [Header("Terrain Settings")]
     [Range(1, 512)]
-    public int terrainWidth;
+    public int terrainWidth = 100;
     [Range(1, 512)]
-    public int terrainHeight;
+    public int terrainHeight = 100;
     [Range(1, 20)]
-    public float visualizationScale;
+    public float visualizationScale = 5;
 
     [Header("Octave Settings")]
     [Range(0, 8)]
