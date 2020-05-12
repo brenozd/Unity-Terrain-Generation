@@ -18,7 +18,7 @@ public class MarchingCubeEditor : Editor
         DrawDefaultInspector();
         if (GUILayout.Button("Generate New Mesh"))
         {
-            mc.generateMesh();
+            //mc.generateMesh();
         }
     }
 }

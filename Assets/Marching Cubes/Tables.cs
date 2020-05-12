@@ -1,7 +1,20 @@
 ﻿public static class Tables
 {
     #region Lookup Tables
-    static int[] cubeCase = new int[] {
+
+    public static readonly int[,] EdgeConnection = new int[,]
+    {
+        {0,1}, {1,2}, {2,3}, {3,0},
+        {4,5}, {5,6}, {6,7}, {7,4},
+        {0,4}, {1,5}, {2,6}, {3,7}
+    };
+    public static readonly int[,] VertexOffset = new int[,]
+    {
+        {0, 0, 0},{1, 0, 0},{1, 1, 0},{0, 1, 0},
+        {0, 0, 1},{1, 0, 1},{1, 1, 1},{0, 1, 1}
+    };
+
+    public static int[] cases = new int[] {
     0x0  , 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c,
     0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03, 0xe09, 0xf00,
     0x190, 0x99 , 0x393, 0x29a, 0x596, 0x49f, 0x795, 0x69c,
@@ -35,7 +48,7 @@
     0xf00, 0xe09, 0xd03, 0xc0a, 0xb06, 0xa0f, 0x905, 0x80c,
     0x70c, 0x605, 0x50f, 0x406, 0x30a, 0x203, 0x109, 0x0   };
 
-    static int[,] triangulationTable = new int[,] {
+    public static int[,] triangulationTable = new int[,] {
     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
     {0, 8, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
     {0, 1, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},

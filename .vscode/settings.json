@@ -52,13 +52,12 @@
         "ProjectSettings/":true,
         "temp/":true,
         "Temp/":true,
-        "Assets/Scenes/":true,
+        ".gitattributes":true,
+        "**/*.csproj":true,
+        "**/*.sln":true,
         "Logs/":true,
         "Packages/":true,
-        ".gitattributes":true,
-        ".csproj":true,
-        "**/*.sln":true,
-        "**/*.csproj":true,
+        "Assets/Scenes":true,
         "**/*.md":true
     },
 
@@ -79,7 +78,7 @@
                         "comment.block.documentation"
                     ],
                     "settings": {
-                        "foreground": "#dbdbdb"
+                        "foreground": "#4ef542"
                     }
                 }
             ]

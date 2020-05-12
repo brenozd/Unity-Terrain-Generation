@@ -4,113 +4,95 @@ using UnityEngine;
 
 public class MarchingCube : MonoBehaviour
 {
-    public int StepSize = 1;
-    public int TerrainSize = 20;
-
-    [Header("Noise settings")]
-    public int textureWidth = 256;
-    public int textureHeight = 256;
-    public int textureDepth = 256;
-    [Range(0.00f, 1.00f)]
+    ///<summary>
+    ///Isosurface Value
+    ///Points if density value equals or below this will be considered inactive
+    ///</summary>
     public float isosurfaceValue = 0.485f;
 
-    [Header("Generation Settings")]
     public bool autoUpdate = true;
 
     public float[,,] densityValues;
 
-    private Texture3D noiseTexture;
+    private int index = 0;
 
-    private Vector3[] points = new Vector3[8];
+    public MarchingCube() { }
 
-    public MarchingCube(float[,,] array)
+    ///<summary> Performs a single march on a point
+    ///<param name = "X">
+    ///X component of point
+    ///</param>
+    ///<param name = "Y">
+    ///Y component of point
+    ///</param>
+    ///<param name = "Z">
+    ///Z component of point
+    ///</param>
+    ///<param name = "VertexList">
+    ///List of triangle vertex generated from a single (X, Y, Z) point
+    ///</param>
+    ///<param name = "IndexList">
+    ///List of triangle indexes generated from a single (X, Y, Z) point
+    ///</param>
+    ///</summary>
+    public void march(float x, float y, float z, List<Vector3> vertexList, List<int> indexList)
     {
-        densityValues = array;
-    }
+        //Array that stores all 12 possible edge points
+        Vector3[] points = new Vector3[12];
 
-    int getCaseValue(int x, int y, int z)
-    {
-        int _returnValue = 0;
-        for (int _x = 0; _x <= 1; _x++)
+        //Flag that indicates how many points will be generated
+        int edgeFlag = 0;
+
+        //Get case value of point and it 8 neighbors
+        int auxIndex = 0;
+        for (int i = 0; i < 8; i++)
+            if (densityValues[(int)x + Tables.VertexOffset[i, 0],
+                              (int)y + Tables.VertexOffset[i, 1],
+                              (int)z + Tables.VertexOffset[i, 2]] <= isosurfaceValue) auxIndex |= 1 << i;
+
+        edgeFlag = Tables.cases[auxIndex];
+
+        //If theres no points return
+        if (edgeFlag == 0) return;
+
+        //For every points in edgeFlag (every bit set to 1)
+        for (int i = 0; i < 12; i++)
         {
-            for (int _y = 0; _y <= 1; _y++)
+            if ((edgeFlag & (1 << i)) != 0)
             {
-                for (int _z = 0; _z <= 1; _z++)
-                {
-                    _returnValue |= ((densityValues[x + _x, y + _y, z + _z] > isosurfaceValue ? 1 : 0) << (_x * 4 + _y * 2 + _z));
-                }
-            }
-        }
-        return _returnValue;
-    }
+                //Get points that match the first element of EdgeConnection table
+                Vector3 p1 = new Vector3(x + Tables.VertexOffset[Tables.EdgeConnection[i, 0], 0],
+                                         y + Tables.VertexOffset[Tables.EdgeConnection[i, 0], 1],
+                                         z + Tables.VertexOffset[Tables.EdgeConnection[i, 0], 2]);
 
-    Vector3 vertexInterpolation(Vector3 p1, Vector3 p2, int vp1, int vp2)
-    {
-        float t = (isosurfaceValue - vp1) / (vp2 - vp1);
-        float _x = p1.x + t * (p2.x - p1.x);
-        float _y = p1.y + t * (p2.y - p1.y);
-        float _z = p1.z + t * (p2.z - p1.z);
-        return new Vector3(_x, _y, _z);
-    }
+                //Get points that match the second element of EdgeConnection table
+                Vector3 p2 = new Vector3(x + Tables.VertexOffset[Tables.EdgeConnection[i, 1], 0],
+                                         y + Tables.VertexOffset[Tables.EdgeConnection[i, 1], 1],
+                                         z + Tables.VertexOffset[Tables.EdgeConnection[i, 1], 2]);
 
-    public float[,,] calcualteNoiseValues(bool newNoiseTexture = true)
-    {
-        float[,,] _returnValues = new float[TerrainSize, TerrainSize, TerrainSize];
-        if (newNoiseTexture)
-            noiseTexture = NoiseTexture.generateTexture3D(textureWidth, textureHeight, textureDepth);
+                //Calculate de interpolation factor
+                float t = (isosurfaceValue - densityValues[(int)p1.x, (int)p1.y, (int)p1.z]) / 
+                          (densityValues[(int)p2.x, (int)p2.y, (int)p2.z] - densityValues[(int)p1.x, (int)p1.y, (int)p1.z]);
 
-        float gridStepSizeX = textureWidth / TerrainSize;
-        float gridStepSizeY = textureHeight / TerrainSize;
-        float gridStepSizeZ = textureDepth / TerrainSize;
-
-        for (int _x = 0; _x < TerrainSize; _x++)
-        {
-            for (int _y = 0; _y < TerrainSize; _y++)
-            {
-                for (int _z = 0; _z < TerrainSize; _z++)
-                {
-                    _returnValues[_x, _y, _z] = noiseTexture.GetPixel((int)(_x * gridStepSizeX), (int)(_y * gridStepSizeY), (int)(_z * gridStepSizeZ)).grayscale;
-                }
-            }
-        }
-        return _returnValues;
-    }
-
-    public Mesh generateMesh()
-    {
-        Mesh _returnMesh = new Mesh();
-        densityValues = calcualteNoiseValues();
-        List<Vector3> _vertices = new List<Vector3>();
-
-        for (int _x = 0; _x < TerrainSize - 1; _x++)
-        {
-            for (int _y = 0; _y < TerrainSize - 1; _y++)
-            {
-                for (int _z = 0; _z < TerrainSize - 1; _z++)
-                {
-                    int cubeIndex = getCaseValue(_x, _y, _z);
-                    Vector3 p0 = new Vector3(_x, _y, _z);
-                    //if (cubeCase[cubeIndex] & 1 != 0) _vertices.Add(vertexInterpolation(p0, ))
-                }
+                //Interpolate
+                points[i] = Vector3.Lerp(p1, p2, t);
             }
         }
 
-        return _returnMesh;
-    }
-    private void OnDrawGizmosSelected()
-    {
-        if (densityValues != null)
-        {
-            for (int _x = 0; _x < TerrainSize; _x++)
+        //For each possible triangle configuration
+        for (int i = 0; i < 5; i++)
+        {   
+            //If theres an tiangle to be added
+            if (Tables.triangulationTable[auxIndex, 3 * i] < 0) break;
+            //Get triangle index
+            index = vertexList.Count;
+            //For each triangle points
+            for (int j = 0; j < 3; j++)
             {
-                for (int _y = 0; _y < TerrainSize; _y++)
-                {
-                    for (int _z = 0; _z < TerrainSize; _z++)
-                    {
-                        Gizmos.color = new Color(densityValues[_x, _y, _z], densityValues[_x, _y, _z], densityValues[_x, _y, _z]);
-                        Gizmos.DrawSphere(new Vector3(_x, _y, _z), 0.1f);
-                    }
-                }
+                //Add vertex triangle to list
+                vertexList.Add(points[Tables.triangulationTable[auxIndex, 3 * i + j]]);
+                //Add triangle vertex indexes to List
+                indexList.Add(index + j);
             }
         }
     }
