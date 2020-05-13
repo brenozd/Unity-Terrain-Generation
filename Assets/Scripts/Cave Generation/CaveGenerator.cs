@@ -11,9 +11,9 @@ public class CaveGenerator : MonoBehaviour
     public int textureHeight = 256;
 
     [Range(0.000f, 1.000f)]
-    public float offset = 0.495f;
+    public float wallLevel = 0.495f;
+    public Vector3 Offset = Vector3.zero;
     public float noiseScale = 6f;
-    public int Seed = 0;
 
     [Header("CA Map settings")]
     public int nearbyWallsToFloor = 2;
@@ -31,7 +31,7 @@ public class CaveGenerator : MonoBehaviour
 
     void Awake()
     {
-        Noise.Seed = Seed;
+
         if (GameObject.Find("Cells") == null)
             parent = new GameObject("Cells");
         else
@@ -46,8 +46,8 @@ public class CaveGenerator : MonoBehaviour
             values = new float[caveWidth, caveHeight];
             values = caMap(generateNoiseValues());
             printGame();
+            Camera.main.transform.position = new Vector3(caveWidth/2, caveHeight/2, caveWidth >= caveHeight ? -caveWidth : -caveHeight);
         }
-
     }
 
     int computeNeighbors(int x, int y, float[,] array)
@@ -59,20 +59,20 @@ public class CaveGenerator : MonoBehaviour
             {
                 int _x = x + i > caveWidth - 1 ? 0 : x + i < 0 ? caveWidth - 1 : x + i;
                 int _y = y + j > caveHeight - 1 ? 0 : y + j < 0 ? caveHeight - 1 : y + j;
-                neighbors += array[_x, _y] >= offset ? 1 : 0;
+                neighbors += array[_x, _y] >= wallLevel ? 1 : 0;
             }
         }
-        neighbors -= array[x, y] >= offset ? 1 : 0;
+        neighbors -= array[x, y] >= wallLevel ? 1 : 0;
         return neighbors;
     }
 
     float[,] generateNoiseValues()
     {
-        NoiseTexture.Seed = Seed;
         NoiseTexture.NoiseScale = noiseScale;
+        NoiseTexture.Offset = Offset;
 
-        NoiseTexture.clearPermutationTable();
-        Texture2D noiseTexture = NoiseTexture.generateTexture2D(textureWidth, textureHeight);
+        Texture2D noiseTexture = NoiseTexture.generateTexture2D_GPU(textureWidth, textureHeight);
+
         float[,] _returnList = new float[caveWidth, caveHeight];
 
         float gridStepSizeX = textureWidth / caveWidth;
@@ -96,11 +96,11 @@ public class CaveGenerator : MonoBehaviour
         {
             for (int y = 0; y < caveHeight; y++)
             {
-                if (computeNeighbors(x, y, array) >= nearbyWallsToWall && array[x, y] < offset)
+                if (computeNeighbors(x, y, array) >= nearbyWallsToWall && array[x, y] < wallLevel)
                     _returnList[x, y] = 1.0f;
-                else if (computeNeighbors(x, y, array) >= nearbyWallsToMantain && array[x, y] >= offset)
+                else if (computeNeighbors(x, y, array) >= nearbyWallsToMantain && array[x, y] >= wallLevel)
                     _returnList[x, y] = 1.0f;
-                else if (computeNeighbors(x, y, array) <= nearbyWallsToFloor && array[x, y] >= offset)
+                else if (computeNeighbors(x, y, array) <= nearbyWallsToFloor && array[x, y] >= wallLevel)
                     _returnList[x, y] = 0.0f;
                 else _returnList[x, y] = array[x, y];
             }
@@ -120,7 +120,7 @@ public class CaveGenerator : MonoBehaviour
             for (int j = 0; j < caveHeight; j++)
             {
                 GameObject go = Instantiate(prefab, new Vector3(i, j, 0), Quaternion.identity, parent.transform);
-                if (values[i, j] < offset)
+                if (values[i, j] < wallLevel)
                     go.GetComponent<Renderer>().material.color = Color.black;
                 else
                     go.GetComponent<Renderer>().material.color = Color.white;

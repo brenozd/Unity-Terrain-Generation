@@ -3,14 +3,14 @@ using UnityEditor;
 using System.Diagnostics;
 using System.Threading;
 
-[CustomEditor(typeof(MarchingCube))]
+[CustomEditor(typeof(MarchCube))]
 public class MarchingCubeEditor : Editor
 {
-    MarchingCube mc;
+    MarchCube mc;
 
     void OnEnable()
     {
-        mc = (MarchingCube)target;
+        mc = (MarchCube)target;
     }
 
     public override void OnInspectorGUI()
@@ -18,7 +18,7 @@ public class MarchingCubeEditor : Editor
         DrawDefaultInspector();
         if (GUILayout.Button("Generate New Mesh"))
         {
-            //mc.generateMesh();
+            mc.generateNewTerrain();
         }
     }
 }

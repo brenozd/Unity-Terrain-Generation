@@ -1,23 +1,33 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class MarchCubeTest : MonoBehaviour
+public class MarchCube : MonoBehaviour
 {
-
+    [Header("Terrain Settings")]
     public int TerrainSize = 128;
+
+    [Header("Texture Settings")]
     public int textureWidth = 256;
     public int textureHeight = 256;
     public int textureDepth = 256;
-    public int Seed = 0;
+    public Vector3 Offset = Vector3.zero;
     public float NoiseScale = 2f;
+
+    [Header("Exibition Settings")]
     public float RotateSpeed = 10f;
     public Material material;
+
     MarchingCube mc = new MarchingCube();
     List<Vector3> vertexList = new List<Vector3>();
     List<int> indexList = new List<int>();
 
-    private void Start()
+    private void Start() {
+        generateNewTerrain();
+    }
+
+    public void generateNewTerrain()
     {
+        var watch = System.Diagnostics.Stopwatch.StartNew();
         //Calculate density values
         mc.densityValues = calcualteNoiseValues3D();
 
@@ -35,13 +45,15 @@ public class MarchCubeTest : MonoBehaviour
         Debug.Log("Number of vertex: " + vertexList.Count);
         //Split meshes and add it to game
         SplitMeshes();
+        Camera.main.transform.position = new Vector3(0, 0, -TerrainSize - (TerrainSize/2));
+        watch.Stop();
+        Debug.LogWarning("Generation time: " + watch.ElapsedMilliseconds + " ms");
     }
 
     //Rotates
     private void FixedUpdate()
     {
         this.transform.Rotate(Vector3.up, RotateSpeed * Time.deltaTime);
-
     }
     
     //Calculate density values based on a Perlin Noise 3D
@@ -49,8 +61,9 @@ public class MarchCubeTest : MonoBehaviour
     {
         float[,,] _returnValues = new float[TerrainSize, TerrainSize, TerrainSize];
 
-        NoiseTexture.Seed = Seed;
         NoiseTexture.NoiseScale = NoiseScale;
+        NoiseTexture.Offset = Offset;
+
         Texture3D noiseTexture = NoiseTexture.generateTexture3D(textureWidth, textureHeight, textureDepth);
 
         float gridStepSizeX = textureWidth / TerrainSize;

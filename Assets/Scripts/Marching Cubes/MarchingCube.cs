@@ -16,8 +16,6 @@ public class MarchingCube : MonoBehaviour
 
     private int index = 0;
 
-    public MarchingCube() { }
-
     ///<summary> Performs a single march on a point
     ///<param name = "X">
     ///X component of point
