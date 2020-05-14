@@ -30,7 +30,11 @@ public class MarchCube : MonoBehaviour
         var watch = System.Diagnostics.Stopwatch.StartNew();
         //Calculate density values
         mc.densityValues = calcualteNoiseValues3D();
+        watch.Stop();
+        Debug.Log("Density generation time: " + watch.ElapsedMilliseconds + " ms");
 
+        watch.Reset();
+        watch.Start();
         //For each point in terrain, except last, generate triangles
         for (int i = 0; i < TerrainSize - 1; i++)
         {
@@ -47,7 +51,7 @@ public class MarchCube : MonoBehaviour
         SplitMeshes();
         Camera.main.transform.position = new Vector3(0, 0, -TerrainSize - (TerrainSize/2));
         watch.Stop();
-        Debug.LogWarning("Generation time: " + watch.ElapsedMilliseconds + " ms");
+        Debug.Log("Generation time: " + watch.ElapsedMilliseconds + " ms");
     }
 
     //Rotates
@@ -64,7 +68,7 @@ public class MarchCube : MonoBehaviour
         NoiseTexture.NoiseScale = NoiseScale;
         NoiseTexture.Offset = Offset;
 
-        Texture3D noiseTexture = NoiseTexture.generateTexture3D(textureWidth, textureHeight, textureDepth);
+        Texture3D noiseTexture = NoiseTexture.generateTexture3D_GPU(textureWidth, textureHeight, textureDepth);
 
         float gridStepSizeX = textureWidth / TerrainSize;
         float gridStepSizeY = textureHeight / TerrainSize;

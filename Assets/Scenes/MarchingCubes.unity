@@ -140,9 +140,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TerrainSize: 128
-  textureWidth: 256
-  textureHeight: 256
-  textureDepth: 256
+  textureWidth: 512
+  textureHeight: 512
+  textureDepth: 512
   Offset: {x: 0, y: 0, z: 0}
   NoiseScale: 5
   RotateSpeed: 10
@@ -516,6 +516,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Test
+      objectReference: {fileID: 0}
+    - target: {fileID: 4606364589040051120, guid: 362ac579f2b78544392fd6708f94ade9,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4606364589040051122, guid: 362ac579f2b78544392fd6708f94ade9,
         type: 3}

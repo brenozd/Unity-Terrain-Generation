@@ -235,24 +235,31 @@ public class Noise
         int _g0 = permutation[(((_x) & 255) + (
                   permutation[((_y) & 255) +
                   permutation[(_z) & 255]])) & 255];
+
         int _g1 = permutation[(((_x + 1) & 255) + (
                   permutation[((_y) & 255) +
                   permutation[(_z) & 255]])) & 255];
+
         int _g2 = permutation[(((_x) & 255) + (
                   permutation[((_y + 1) & 255) +
                   permutation[(_z) & 255]])) & 255];
+
         int _g3 = permutation[(((_x + 1) & 255) + (
                   permutation[((_y + 1) & 255) +
                   permutation[(_z) & 255]])) & 255];
+
         int _g4 = permutation[(((_x) & 255) + (
                   permutation[((_y) & 255) +
                   permutation[(_z + 1) & 255]])) & 255];
+
         int _g5 = permutation[(((_x + 1) & 255) + (
                   permutation[((_y) & 255) +
                   permutation[(_z + 1) & 255]])) & 255];
+
         int _g6 = permutation[(((_x) & 255) + (
                   permutation[((_y + 1) & 255) +
                   permutation[(_z + 1) & 255]])) & 255];
+                  
         int _g7 = permutation[(((_x + 1) & 255) + (
                   permutation[((_y + 1) & 255) +
                   permutation[(_z + 1) & 255]])) & 255];

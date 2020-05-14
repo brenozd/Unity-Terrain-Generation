@@ -329,11 +329,11 @@ MonoBehaviour:
   caveHeight: 50
   textureWidth: 512
   textureHeight: 512
-  wallLevel: 0.485
-  Offset: {x: 0, y: 100, z: 0}
+  wallLevel: 0.5
+  Offset: {x: 0, y: 0, z: 0}
   noiseScale: 6
-  nearbyWallsToFloor: 2
-  nearbyWallsToWall: 5
+  nearbyWallsToFloor: 4
+  nearbyWallsToWall: 4
   nearbyWallsToMantain: 4
   prefab: {fileID: 7171136587948534423, guid: 97c58ff5a56cfb0429494d221a27d900, type: 3}
   autoUpdate: 1

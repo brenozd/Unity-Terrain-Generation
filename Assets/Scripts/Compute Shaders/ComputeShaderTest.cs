@@ -2,8 +2,6 @@
 
 public class ComputeShaderTest : MonoBehaviour
 {
-    public ComputeShader compute;
-    
     [Header("Noise Texture settings")]
     public int size = 512;
     public Vector3 Offset = Vector3.zero;
@@ -13,8 +11,14 @@ public class ComputeShaderTest : MonoBehaviour
     public GameObject cpuPrefab;
     public GameObject gpuPrefab;
 
+    [Header("Auto update settings")]
+    public bool autoUpdate = true;
+
     private RenderTexture result;
-    void Start()
+    private void Start() {
+        doStuff();
+    }
+    public void doStuff()
     {
         //CPU Based Perlin Noise
         var watch = System.Diagnostics.Stopwatch.StartNew();
@@ -33,21 +37,35 @@ public class ComputeShaderTest : MonoBehaviour
         watch.Reset();
         watch = System.Diagnostics.Stopwatch.StartNew();
 
-        int kernel = compute.FindKernel("NoiseTexture2D");
-        result = new RenderTexture(size, size, 24);
+        ComputeShader cs = (ComputeShader)Resources.Load("PerlinNoise");
+
+        int kernel = cs.FindKernel("NoiseTexture2D");
+        RenderTexture result = new RenderTexture(size, size, 24);
         result.enableRandomWrite = true;
         result.format = RenderTextureFormat.ARGB32;
         result.Create();
 
-        compute.SetTexture(kernel, "NoiseTexture", result);
-        compute.SetFloat("noiseScale", NoiseTexture.NoiseScale);
-        compute.SetInts("size", new int[2] { size, size });
-        compute.SetFloats("offset", new float[3] {Offset.x, Offset.y, Offset.z});
-        compute.Dispatch(kernel, size / 8, size / 8, 1);
+        ComputeBuffer buffer = new ComputeBuffer(size * size, sizeof(float));
+        cs.SetBuffer(kernel, "noiseValues", buffer);
+        cs.SetFloat("noiseScale", NoiseTexture.NoiseScale);
+        cs.SetInts("size", new int[3] { size, size, 1 });
+        cs.SetFloats("offset", new float[3] { Offset.x, Offset.y, Offset.z });
+        cs.Dispatch(kernel, size / 16, size / 16, 1);
 
         Texture2D gpuTex = new Texture2D(size, size, TextureFormat.ARGB32, false);
-        RenderTexture.active = result;
-        gpuTex.ReadPixels(new Rect(0, 0, result.width, result.height), 0, 0);
+        float[] colors = new float[size*size];
+        buffer.GetData(colors);
+        buffer.Dispose();
+        for (int i = 0; i < size; i++)
+        {
+            for (int j = 0; j < size; j++)
+            {
+                    float sample = colors[i*size + j];
+                    Color color = new Color(sample, sample, sample, 1.0f);
+                    gpuTex.SetPixel(i, j, color);
+            }
+        }
+
         gpuTex.Apply();
 
         gpuPrefab.GetComponent<Renderer>().material.mainTexture = gpuTex;

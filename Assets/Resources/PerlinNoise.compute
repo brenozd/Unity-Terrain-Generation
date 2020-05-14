@@ -1,11 +1,13 @@
 ﻿#pragma kernel NoiseTexture2D
+#pragma kernel NoiseTexture3D
 
-RWTexture2D<float4> NoiseTexture;
+RWStructuredBuffer<float> noiseValues;
 
 float1 noiseScale;
-int2 size;
+int3 size;
 float3 offset;
-static int1 permutation[256] = 
+
+static int permutation[256] = 
 {
     151, 160, 137, 91, 90, 15, 131, 13, 201, 95, 96, 53, 194, 233, 7,
     225, 140, 36, 103, 30, 69, 142, 8, 99, 37, 240, 21, 10, 23, 190, 6, 148, 247,
@@ -23,7 +25,6 @@ static int1 permutation[256] =
     199, 106, 157, 184, 84, 204, 176, 115, 121, 50, 45, 127, 4, 150, 254, 138, 236,
     205, 93, 222, 114, 67, 29, 24, 72, 243, 141, 128, 195, 78, 66, 215, 61, 156, 180
 };
-
 
 static int PI = 3.141592653589793238462;
 
@@ -47,6 +48,14 @@ float1 fade(float1 t)
 float Grad(int hash, float x, float y)
 {
     return ((hash & 1) == 0 ? x : -x) + ((hash & 2) == 0 ? y : -y);
+}
+
+float Grad(int hash, float x, float y, float z)
+{
+        int h = hash & 15;
+        float u = h < 8 ? x : y;
+        float v = h < 4 ? y : (h == 12 || h == 14 ? x : z);
+        return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
 }
 
 float PerlinNoise2D(float x, float y)
@@ -77,9 +86,77 @@ float PerlinNoise2D(float x, float y)
     return (LinearInterpolation(a, b, fade(y - _y))+1.0)/2.0;
 }
 
-[numthreads(8,8,1)]
+float PerlinNoise3D(float x, float y, float z)
+{
+    float _x = floor(x);
+    float _y = floor(y);
+    float _z = floor(z);
+
+    int _g0 = permutation[(((int)(_x)     & 255) + (
+              permutation[( (int)(_y)     & 255) +
+              permutation[  (int)(_z)     & 255]])) & 255];
+
+    int _g1 = permutation[(((int)(_x + 1) & 255) + (
+              permutation[( (int)(_y)     & 255) +
+              permutation[  (int)(_z)     & 255]])) & 255];   
+
+    int _g2 = permutation[(((int)(_x)     & 255) + (
+              permutation[( (int)(_y + 1) & 255) +
+              permutation[  (int)(_z)     & 255]])) & 255];
+
+    int _g3 = permutation[(((int)(_x + 1) & 255) + (
+              permutation[( (int)(_y + 1) & 255) +
+              permutation[  (int)(_z)     & 255]])) & 255];
+
+    int _g4 = permutation[(((int)(_x)     & 255) + (
+              permutation[( (int)(_y)     & 255) +
+              permutation[  (int)(_z + 1) & 255]])) & 255];
+
+    int _g5 = permutation[(((int)(_x + 1) & 255) + (
+              permutation[( (int)(_y)     & 255) +
+              permutation[  (int)(_z + 1) & 255]])) & 255];
+    
+    int _g6 = permutation[(((int)(_x)     & 255) + (
+              permutation[( (int)(_y + 1) & 255) +
+              permutation[  (int)(_z + 1) & 255]])) & 255];
+    
+    int _g7 = permutation[(((int)(_x + 1) & 255) + (
+              permutation[( (int)(_y + 1) & 255) +
+              permutation[  (int)(_z + 1) & 255]])) & 255];
+
+    float a = CosineInterpolation(Grad(_g0, (x -  _x),        (y - _y),         (z -  _z)),
+                                  Grad(_g1, (x - (_x + 1.0)), (y - _y),         (z -  _z)),
+                                  fade(x - _x));
+
+    float b = CosineInterpolation(Grad(_g2, (x -  _x),        (y - (_y + 1.0)), (z -  _z)),
+                                  Grad(_g3, (x - (_x + 1.0)), (y - (_y + 1.0)), (z -  _z)),
+                                  fade(x - _x));
+
+    float c = CosineInterpolation(Grad(_g4, (x -  _x),        (y - (_y)),       (z - (_z + 1.0))),
+                                  Grad(_g5, (x - (_x + 1.0)), (y - (_y)),       (z - (_z + 1.0))),
+                                  fade(x - _x));
+
+    float d = CosineInterpolation(Grad(_g6, (x -  _x),        (y - (_y + 1.0)), (z - (_z + 1.0))),
+                                  Grad(_g7, (x - (_x + 1.0)), (y - (_y + 1.0)),  (z - (_z + 1.0))),
+                                  fade(x - _x));
+    
+    float r = CosineInterpolation(a, b, fade(y - _y));
+    float s = CosineInterpolation(c, d, fade(y - _y));
+
+    return (LinearInterpolation(r, s, fade(z - _z))+1.0)/2;
+}
+
+[numthreads(16,16,1)]
 void NoiseTexture2D (uint3 id : SV_DispatchThreadID)
 {
-    float value = PerlinNoise2D((float)id.x / size.x * noiseScale + offset.x, (float)id.y / size.y * noiseScale + offset.y);
-    NoiseTexture[id.xy] = float4(value, value, value, 1.0);
+    noiseValues[id.x*size.x + id.y] = PerlinNoise2D((float)id.x / size.x * noiseScale + offset.x, 
+                                                    (float)id.y / size.y * noiseScale + offset.y);;
+}
+
+[numthreads(8,8,8)]
+void NoiseTexture3D (uint3 id : SV_DispatchThreadID)
+{
+    noiseValues[id.x * size.x * size.y + id.y*size.y + id.z] = PerlinNoise3D((float)id.x / size.x * noiseScale + offset.x, 
+                                                                             (float)id.y / size.y * noiseScale + offset.y,  
+                                                                             (float)id.z / size.z * noiseScale + offset.z);;
 }

@@ -25,7 +25,7 @@ public class CaveGeneratorEditor : Editor
                 watch.Stop();
                 UnityEngine.Debug.LogWarning("Runtime: " + watch.ElapsedMilliseconds);
             }
-            if (GUILayout.Button("Generate new cave"))
+            if (!caveGen.autoUpdate && GUILayout.Button("Generate new cave"))
             {
                 var watch = new Stopwatch();
                 watch.Start();
