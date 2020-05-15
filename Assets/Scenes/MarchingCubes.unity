@@ -140,9 +140,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TerrainSize: 128
-  textureWidth: 512
-  textureHeight: 512
-  textureDepth: 512
+  textureWidth: 128
+  textureHeight: 128
+  textureDepth: 128
   Offset: {x: 0, y: 0, z: 0}
   NoiseScale: 5
   RotateSpeed: 10

@@ -42,7 +42,7 @@ public class MeshTerrainGenerator : MonoBehaviour
         {
             for (int z = 0; z <= size; z++, i++)
             {
-                float y = Noise.PerlinNoise2D(x * 01f, z * 1f) * 1;
+                float y = Noise.PerlinNoise2D(x * 0.05f, z * 0.05f) * 8;
                 mesh.vertices[i] = (new Vector3(x, y, z));
             }
         }
@@ -50,8 +50,22 @@ public class MeshTerrainGenerator : MonoBehaviour
         return mesh;
     }
 
-    Mesh[] SplitMeshes(MeshComponents mesh, int size, int vertsPerMesh = 65534)
+    Mesh[] SplitMeshes(MeshComponents mesh, int size)
     {
+        //vertsPerMesh > 2*(size+1)
+        //vertsPerMesh < 64512 (65534 exatctly)
+        //vertsPerMesh must be multiple of 2
+        
+        int aux = 0;
+        int powerBase = 2;
+        while (aux * size+1 < 30000){
+            powerBase++;
+            aux = (int)Mathf.Pow(2, powerBase);
+        }
+
+
+        int vertsPerMesh = (size + 1) * (int)Mathf.Pow(2.0f, powerBase);
+        Debug.Log(vertsPerMesh);
         int numMeshes = mesh.vertices.Length / vertsPerMesh + 1;
         Mesh[] returnMeshes = new Mesh[numMeshes];
 
@@ -60,16 +74,18 @@ public class MeshTerrainGenerator : MonoBehaviour
             returnMeshes[m] = new Mesh();
             List<Vector3> mVertices = new List<Vector3>();
             List<int> mTriangles = new List<int>();
-            int index = 0;
 
+            int index = 0;
+            Debug.LogWarning(mesh.vertices.Length);
             for (int v = 0; v < vertsPerMesh; v++)
             {
-                index = m * vertsPerMesh + v;
-                if (index < mesh.vertices.Length)
+                index = (m * (vertsPerMesh - (size + 1)) + v);
+                if (index < mesh.vertices.Length) 
                     mVertices.Add(mesh.vertices[index]);
+                //Debug.Log("M: " + m + " vertsPerMesh: " + vertsPerMesh + " size+1: " + (size+1) + " v: " + v + " index: " + index);
             }
 
-            for (int v = 0, x = 0; x < (mVertices.Count / (size+1)) - 1; x++)
+            for (int v = 0, x = 0; x < (mVertices.Count / (size + 1)) - 1; x++)
             {
                 for (int z = 0; z < size; z++, v++)
                 {
