@@ -6,9 +6,3 @@ Algorithms:
 - Perlin Noise 1D, 2D and 3D
 - Cellular automaton
 - Marching Cubes
-
-To be studied:
-- Compute Shader
-- Worley Noise
-- Simplex Noise
-- L-System
