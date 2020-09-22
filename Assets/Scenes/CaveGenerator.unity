@@ -335,7 +335,7 @@ MonoBehaviour:
   nearbyWallsToFloor: 4
   nearbyWallsToWall: 4
   nearbyWallsToMantain: 4
-  prefab: {fileID: 7171136587948534423, guid: 97c58ff5a56cfb0429494d221a27d900, type: 3}
+  prefab: {fileID: 4252017275630019282, guid: 97c58ff5a56cfb0429494d221a27d900, type: 3}
   autoUpdate: 1
 --- !u!4 &1838746994
 Transform:
@@ -344,7 +344,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1838746992}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []

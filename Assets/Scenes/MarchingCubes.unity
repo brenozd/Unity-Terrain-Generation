@@ -140,9 +140,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TerrainSize: 128
-  textureWidth: 128
-  textureHeight: 128
-  textureDepth: 128
+  textureWidth: 512
+  textureHeight: 512
+  textureDepth: 512
   Offset: {x: 0, y: 0, z: 0}
   NoiseScale: 5
   RotateSpeed: 10
@@ -228,7 +228,7 @@ PrefabInstance:
     - target: {fileID: 1235818641394589757, guid: 43ec8c0f8ba5bde46a05032724dc3182,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 43ec8c0f8ba5bde46a05032724dc3182, type: 3}
@@ -425,7 +425,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!102 &1110277568
 TextMesh:
   serializedVersion: 3
